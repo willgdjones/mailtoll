@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings - Mail Toll</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Settings</h1>
+    <p>Configure your Mail Toll endpoint.</p>
+
+    <div class="handle-display" id="handleDisplay"></div>
+
+    <form class="settings-form" id="settingsForm">
+      <div class="form-group">
+        <label for="price">Price per message (USD)</label>
+        <input type="number" id="price" name="price_usd" step="0.01" min="0.01" required>
+      </div>
+
+      <div class="form-group">
+        <label>Accepted payment rails</label>
+        <div class="checkbox-group">
+          <label><input type="checkbox" name="rails" value="stripe"> Stripe</label>
+          <label><input type="checkbox" name="rails" value="coinbase"> Coinbase</label>
+          <label><input type="checkbox" name="rails" value="stablecoin"> Stablecoin</label>
+          <label><input type="checkbox" name="rails" value="x402"> x402</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="whitelist">Whitelisted emails (comma-separated)</label>
+        <input type="text" id="whitelist" name="whitelist" placeholder="partner@company.com, friend@example.com">
+      </div>
+
+      <div class="form-group">
+        <label for="preferences">Category preferences</label>
+        <textarea id="preferences" name="category_preferences" placeholder="Open to engineering roles and AI tooling partnerships"></textarea>
+      </div>
+
+      <button type="submit" class="btn">Save Settings</button>
+    </form>
+
+    <div class="status-msg" id="statusMsg"></div>
+  </div>
+
+  <script>
+    const data = /*__RECIPIENT_DATA__*/null;
+
+    if (data) {
+      document.getElementById('handleDisplay').textContent =
+        'Your endpoint: ' + window.location.origin + '/registry/' + data.handle;
+      document.getElementById('price').value = data.price_usd;
+      document.getElementById('whitelist').value = (data.whitelist || []).join(', ');
+      document.getElementById('preferences').value = data.category_preferences || '';
+
+      const railCheckboxes = document.querySelectorAll('input[name="rails"]');
+      railCheckboxes.forEach(cb => {
+        cb.checked = data.accepted_rails.includes(cb.value);
+      });
+    }
+
+    document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const statusMsg = document.getElementById('statusMsg');
+
+      const railCheckboxes = document.querySelectorAll('input[name="rails"]:checked');
+      const accepted_rails = Array.from(railCheckboxes).map(cb => cb.value);
+
+      const whitelistStr = document.getElementById('whitelist').value.trim();
+      const whitelist = whitelistStr ? whitelistStr.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+      const body = {
+        price_usd: parseFloat(document.getElementById('price').value),
+        accepted_rails,
+        whitelist,
+        category_preferences: document.getElementById('preferences').value.trim(),
+      };
+
+      try {
+        const res = await fetch('/settings', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+
+        if (res.ok) {
+          statusMsg.className = 'status-msg success';
+          statusMsg.textContent = 'Settings saved successfully.';
+        } else {
+          const err = await res.json();
+          statusMsg.className = 'status-msg error';
+          statusMsg.textContent = 'Error: ' + (err.message || err.error);
+        }
+      } catch (err) {
+        statusMsg.className = 'status-msg error';
+        statusMsg.textContent = 'Network error. Please try again.';
+      }
+    });
+  </script>
+</body>
+</html>
