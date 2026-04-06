@@ -25,6 +25,7 @@
         <input type="text" id="handle" name="handle" autocomplete="off">
         <div id="handlePreview" style="margin-top: 0.375rem; font-size: 0.8rem; color: #666;"></div>
         <div id="handleStatus" style="margin-top: 0.375rem; font-size: 0.8rem;"></div>
+        <button type="button" class="btn" id="saveHandleBtn" style="margin-top: 0.75rem; display: none;">Save handle</button>
       </div>
     </div>
 
@@ -130,13 +131,16 @@
         statusEl.style.color = '#991b1b';
         return;
       }
+      var saveHandleBtn = document.getElementById('saveHandleBtn');
       if (val === currentHandle) {
         statusEl.textContent = '';
+        saveHandleBtn.style.display = 'none';
         return;
       }
 
       statusEl.textContent = 'Checking...';
       statusEl.style.color = '#666';
+      saveHandleBtn.style.display = 'none';
 
       handleDebounce = setTimeout(function() {
         fetch('/settings/check-handle/' + encodeURIComponent(val))
@@ -145,12 +149,47 @@
             if (result.available) {
               statusEl.textContent = 'Available';
               statusEl.style.color = '#065f46';
+              saveHandleBtn.style.display = '';
             } else {
               statusEl.textContent = result.error || 'Already taken';
               statusEl.style.color = '#991b1b';
+              saveHandleBtn.style.display = 'none';
             }
           });
       }, 300);
+    });
+
+    document.getElementById('saveHandleBtn').addEventListener('click', async function() {
+      var handle = document.getElementById('handle').value.trim().toLowerCase();
+      var statusEl = document.getElementById('handleStatus');
+      var btn = this;
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      try {
+        var res = await fetch('/settings', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ handle: handle }),
+        });
+
+        if (res.ok) {
+          currentHandle = handle;
+          statusEl.textContent = 'Handle saved';
+          statusEl.style.color = '#065f46';
+          btn.style.display = 'none';
+        } else {
+          var err = await res.json();
+          statusEl.textContent = err.message || err.error;
+          statusEl.style.color = '#991b1b';
+        }
+      } catch (e) {
+        statusEl.textContent = 'Network error. Please try again.';
+        statusEl.style.color = '#991b1b';
+      }
+      btn.disabled = false;
+      btn.textContent = 'Save handle';
     });
 
     document.getElementById('settingsForm').addEventListener('submit', async (e) => {
@@ -164,7 +203,6 @@
       const whitelist = whitelistStr ? whitelistStr.split(',').map(s => s.trim()).filter(Boolean) : [];
 
       const body = {
-        handle: document.getElementById('handle').value.trim().toLowerCase(),
         price_usd: parseFloat(document.getElementById('price').value),
         accepted_rails,
         wallet_address: document.getElementById('wallet').value.trim() || null,
