@@ -62,19 +62,19 @@ authRouter.get('/google/callback', async (req, res, next) => {
     let recipientId: string;
     let handle: string;
 
+    let isNewUser = false;
+
     if (existing) {
-      // Update tokens
+      // Update email if changed
       await supabase
         .from('recipients')
-        .update({
-          gmail_access_token: tokens.access_token!,
-          gmail_refresh_token: tokens.refresh_token || undefined,
-          email: userInfo.email,
-        })
+        .update({ email: userInfo.email })
         .eq('id', existing.id);
       recipientId = existing.id;
       handle = existing.handle;
     } else {
+      isNewUser = true;
+
       // Find unique handle
       handle = baseHandle;
       let suffix = 1;
@@ -94,8 +94,6 @@ authRouter.get('/google/callback', async (req, res, next) => {
           google_id: userInfo.id,
           email: userInfo.email,
           handle,
-          gmail_access_token: tokens.access_token!,
-          gmail_refresh_token: tokens.refresh_token!,
         })
         .select('id')
         .single();
@@ -119,7 +117,7 @@ authRouter.get('/google/callback', async (req, res, next) => {
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 
-    res.redirect('/settings');
+    res.redirect(isNewUser ? '/welcome' : '/settings');
   } catch (err) {
     next(err);
   }

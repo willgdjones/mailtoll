@@ -3,18 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mail Toll - Get paid for your attention</title>
-  <meta name="description" content="Set your price and let agents pay to reach your inbox. Powered by x402 micropayments.">
-  <meta property="og:title" content="Mail Toll - Get paid for your attention">
-  <meta property="og:description" content="Set your price and let agents pay to reach your inbox. Powered by x402 micropayments.">
+  <title id="pageTitle">Mail Toll</title>
+  <link rel="stylesheet" href="/styles.css">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://mailtoll.app">
   <meta property="og:site_name" content="Mail Toll">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Mail Toll - Get paid for your attention">
-  <meta name="twitter:description" content="Set your price and let agents pay to reach your inbox. Powered by x402 micropayments.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>$</text></svg>">
-  <link rel="stylesheet" href="/styles.css">
   <script>
     !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register register_once register_for_session unregister unregister_for_session getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey getNextSurveyStep identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty createPersonProfile opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing debug getPageviewId".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
     posthog.init('phc_ozdLaRxnhuBSXA2Ah8tSBxJnnihSWHGgrkDam7qVizdh', {
@@ -26,28 +20,43 @@
 <body>
   <div class="container">
     <div class="hero">
-      <h1>Mail Toll</h1>
-      <p>Get paid for your attention. Set your price and let agents pay to reach you with priority delivery.</p>
-      <a href="/auth/google" class="btn">Sign in with Google</a>
+      <h1 id="handleTitle"></h1>
+      <p id="priceDisplay"></p>
     </div>
 
     <div class="features">
       <div class="feature">
-        <h3>For Recipients</h3>
-        <p>Set your price, choose payment rails, and whitelist trusted senders. Priority messages are delivered straight to your inbox.</p>
+        <h3>Accepted payment rails</h3>
+        <p id="railsDisplay"></p>
+      </div>
+      <div class="feature" id="preferencesSection" style="display:none">
+        <h3>What they're interested in</h3>
+        <p id="preferencesDisplay"></p>
       </div>
       <div class="feature">
-        <h3>For GTM Agents</h3>
-        <p>Discover endpoints, pay programmatically, and guarantee delivery. No account required &mdash; just query, pay, and send.</p>
-      </div>
-      <div class="feature">
-        <h3>How It Works</h3>
-        <p>1. Sign in with Google and get a public endpoint.<br>
-           2. Agent queries the endpoint for pricing.<br>
-           3. Agent pays via Stripe, Coinbase, stablecoin, or x402.<br>
-           4. Email is delivered to your inbox.</p>
+        <h3>For developers / agents</h3>
+        <p>Query the registry API to get pricing and payment instructions:</p>
+        <div class="handle-display" id="apiEndpoint"></div>
       </div>
     </div>
+
+    <a href="/" class="btn-secondary btn" style="margin-top: 1rem;">Create your own Mail Toll</a>
   </div>
+
+  <script>
+    const data = "/*__PROFILE_DATA__*/";
+    if (data) {
+      document.getElementById('handleTitle').textContent = '@' + data.handle;
+      document.getElementById('pageTitle').textContent = '@' + data.handle + ' - Mail Toll';
+      document.getElementById('priceDisplay').textContent = 'Pay $' + data.price_usd.toFixed(2) + ' to send a priority email to this recipient.';
+      document.getElementById('railsDisplay').textContent = data.accepted_rails.join(', ');
+      document.getElementById('apiEndpoint').textContent = 'GET ' + window.location.origin + '/registry/' + data.handle;
+
+      if (data.category_preferences) {
+        document.getElementById('preferencesSection').style.display = '';
+        document.getElementById('preferencesDisplay').textContent = data.category_preferences;
+      }
+    }
+  </script>
 </body>
 </html>

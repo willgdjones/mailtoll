@@ -1,7 +1,7 @@
 import { pool } from '../../db';
 import { config } from '../../config';
 import { Recipient, ScheduledEmail } from '../../types';
-import { sendEmail } from '../email/resend';
+import { sendEmail, sendNotification } from '../email/resend';
 
 const BATCH_SIZE = 50;
 const MAX_RETRIES = 5;
@@ -90,7 +90,14 @@ async function processEmail(email: ScheduledEmail): Promise<void> {
         [email.id, gmailMessageId]
       );
 
-      console.log(`[Worker] Delivered email ${email.id} → Gmail ${gmailMessageId}`);
+      console.log(`[Worker] Delivered email ${email.id} → ${gmailMessageId}`);
+
+      // Notify recipient
+      await sendNotification({
+        to: recipient.email,
+        senderEmail: email.sender_email,
+        subject: email.subject,
+      });
     } finally {
       client.release();
     }

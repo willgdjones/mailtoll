@@ -2,6 +2,17 @@
 
 ## 2026-04-06
 
+### Pre-launch improvements
+- Error/404 pages — proper HTML pages instead of raw JSON for browser requests
+- Fixed signup flow — removed Gmail token storage since we use Resend now
+- Input validation on /schedule — email format, subject/body length limits
+- Rate limiting — 60 req/min on registry, 20 req/min on schedule/pay
+- Welcome page — new users see onboarding flow before settings
+- Public profile pages — `mailtoll.app/:handle` shows pricing and payment info for agents
+- Email notifications — recipients get notified when a paid email is delivered
+- Earnings dashboard — settings page shows total emails received and earnings
+- Favicon ($ symbol) and OpenGraph meta tags for link previews on social media
+
 ### Add PostHog analytics
 - Added PostHog snippet to landing page and settings page
 - Tracks pageviews and identified users

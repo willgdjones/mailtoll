@@ -3,16 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mail Toll - Get paid for your attention</title>
-  <meta name="description" content="Set your price and let agents pay to reach your inbox. Powered by x402 micropayments.">
-  <meta property="og:title" content="Mail Toll - Get paid for your attention">
-  <meta property="og:description" content="Set your price and let agents pay to reach your inbox. Powered by x402 micropayments.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://mailtoll.app">
-  <meta property="og:site_name" content="Mail Toll">
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Mail Toll - Get paid for your attention">
-  <meta name="twitter:description" content="Set your price and let agents pay to reach your inbox. Powered by x402 micropayments.">
+  <title>Welcome - Mail Toll</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>$</text></svg>">
   <link rel="stylesheet" href="/styles.css">
   <script>
@@ -26,28 +17,33 @@
 <body>
   <div class="container">
     <div class="hero">
-      <h1>Mail Toll</h1>
-      <p>Get paid for your attention. Set your price and let agents pay to reach you with priority delivery.</p>
-      <a href="/auth/google" class="btn">Sign in with Google</a>
+      <h1>You're in!</h1>
+      <p>Your Mail Toll endpoint is live. Here's how it works:</p>
     </div>
 
-    <div class="features">
+    <div class="welcome-steps">
       <div class="feature">
-        <h3>For Recipients</h3>
-        <p>Set your price, choose payment rails, and whitelist trusted senders. Priority messages are delivered straight to your inbox.</p>
+        <h3>1. Set your price</h3>
+        <p>Choose how much it costs to reach your inbox. You can change this anytime.</p>
       </div>
       <div class="feature">
-        <h3>For GTM Agents</h3>
-        <p>Discover endpoints, pay programmatically, and guarantee delivery. No account required &mdash; just query, pay, and send.</p>
+        <h3>2. Share your link</h3>
+        <p>Your public profile is at <strong id="profileLink"></strong>. Agents use this to discover your pricing.</p>
       </div>
       <div class="feature">
-        <h3>How It Works</h3>
-        <p>1. Sign in with Google and get a public endpoint.<br>
-           2. Agent queries the endpoint for pricing.<br>
-           3. Agent pays via Stripe, Coinbase, stablecoin, or x402.<br>
-           4. Email is delivered to your inbox.</p>
+        <h3>3. Get paid to read</h3>
+        <p>When someone pays your toll, their message is delivered to your inbox via email. You earn money for your attention.</p>
       </div>
     </div>
+
+    <a href="/settings" class="btn">Configure your settings</a>
   </div>
+
+  <script>
+    const data = "/*__RECIPIENT_DATA__*/";
+    if (data && data.handle) {
+      document.getElementById('profileLink').textContent = window.location.origin + '/' + data.handle;
+    }
+  </script>
 </body>
 </html>

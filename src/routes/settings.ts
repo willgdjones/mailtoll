@@ -23,6 +23,20 @@ settingsRouter.get('/', requireAuth, async (req: AuthenticatedRequest, res, next
     const fs = await import('fs');
     const htmlPath = path.join(__dirname, '..', 'views', 'settings.html');
     let html = fs.readFileSync(htmlPath, 'utf-8');
+    // Fetch stats
+    const { count: totalEmails } = await supabase
+      .from('scheduled_emails')
+      .select('*', { count: 'exact', head: true })
+      .eq('recipient_id', recipient.id)
+      .eq('status', 'delivered');
+
+    const { data: earnings } = await supabase
+      .from('payment_proofs')
+      .select('amount_usd')
+      .eq('recipient_id', recipient.id);
+
+    const totalEarnings = (earnings || []).reduce((sum: number, p: { amount_usd: number }) => sum + parseFloat(String(p.amount_usd)), 0);
+
     const recipientJson = JSON.stringify({
       handle: recipient.handle,
       email: recipient.email,
@@ -31,6 +45,10 @@ settingsRouter.get('/', requireAuth, async (req: AuthenticatedRequest, res, next
       whitelist: recipient.whitelist || [],
       wallet_address: recipient.wallet_address || '',
       category_preferences: recipient.category_preferences || '',
+      stats: {
+        total_emails: totalEmails || 0,
+        total_earnings_usd: totalEarnings,
+      },
     });
     html = html.replace(
       '"/*__RECIPIENT_DATA__*/"',

@@ -24,6 +24,26 @@ scheduleRouter.post('/', async (req, res, next) => {
       return;
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(body.sender_email)) {
+      res.status(400).json({
+        error: 'invalid_email',
+        message: 'sender_email must be a valid email address',
+      });
+      return;
+    }
+
+    // Validate lengths
+    if (body.subject.length > 500) {
+      res.status(400).json({ error: 'invalid_field', message: 'subject must be under 500 characters' });
+      return;
+    }
+    if (body.body.length > 50000) {
+      res.status(400).json({ error: 'invalid_field', message: 'body must be under 50,000 characters' });
+      return;
+    }
+
     // Look up recipient
     const { data: recipient } = await supabase
       .from('recipients')

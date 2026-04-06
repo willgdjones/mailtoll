@@ -34,6 +34,33 @@ export async function sendEmail(opts: {
   return data.id;
 }
 
+/**
+ * Send a notification to the recipient that a paid email was delivered.
+ */
+export async function sendNotification(opts: {
+  to: string;
+  senderEmail: string;
+  subject: string;
+}): Promise<void> {
+  try {
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${config.resendApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'Mail Toll <notifications@mailtoll.app>',
+        to: [opts.to],
+        subject: `New paid email from ${opts.senderEmail}`,
+        text: `You received a paid priority email via Mail Toll.\n\nFrom: ${opts.senderEmail}\nSubject: ${opts.subject}\n\nCheck your inbox for the full message.`,
+      }),
+    });
+  } catch (err) {
+    console.error('[Notification] Failed to send:', err);
+  }
+}
+
 function escapeHtml(text: string): string {
   return text
     .replace(/&/g, '&amp;')
