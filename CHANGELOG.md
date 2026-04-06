@@ -2,6 +2,15 @@
 
 ## 2026-04-06
 
+### Remove Gmail API permissions
+- OAuth now only requests `openid`, `email`, `profile` — no more `gmail.modify` or `gmail.labels`
+- Landing page updated: "Connect your Gmail" → "Sign in with Google"
+- Removed Gmail-specific language from feature descriptions
+
+### End-to-end delivery verified
+- Full pipeline working: registry → 402 → whitelist bypass → queue → Resend delivery
+- Test email delivered to `will@perihelion.limited` via `noreply@mailtoll.app`
+
 ### Switch to Resend for email delivery
 - Replaced Gmail API injection with Resend REST API
 - No longer requires Gmail OAuth tokens or Gmail API enabled in Google Cloud

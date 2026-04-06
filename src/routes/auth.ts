@@ -15,8 +15,6 @@ const SCOPES = [
   'openid',
   'email',
   'profile',
-  'https://www.googleapis.com/auth/gmail.modify',
-  'https://www.googleapis.com/auth/gmail.labels',
 ];
 
 // Step 1: Redirect to Google consent screen
