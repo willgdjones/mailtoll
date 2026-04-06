@@ -2,6 +2,13 @@
 
 ## 2026-04-06
 
+### Fix OAuth redirect + custom handle selection
+- Fixed OAuth redirect to use `mailtoll.app` instead of `mailtoll-production.up.railway.app`
+- Users can now choose their own handle during signup (welcome page)
+- Handle editable in settings with real-time availability check
+- Handle validation: 3-30 chars, lowercase alphanumeric, hyphens/underscores, no reserved words
+- Auto-generated handles skip reserved words (route paths)
+
 ### Profile pages: bio and social links
 - Added bio, X (Twitter) URL, and LinkedIn URL fields to recipient profiles
 - New fields editable from settings page

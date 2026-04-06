@@ -18,7 +18,18 @@
   <div class="container">
     <div class="hero">
       <h1>You're in!</h1>
-      <p>Your Mail Toll endpoint is live. Here's how it works:</p>
+      <p>Your Mail Toll endpoint is live. Choose your handle to get started.</p>
+    </div>
+
+    <div class="settings-form" style="margin-bottom: 2rem;">
+      <div class="form-group">
+        <label for="handleInput">Choose your handle</label>
+        <input type="text" id="handleInput" placeholder="yourname" autocomplete="off">
+        <div class="handle-preview" id="handlePreview" style="margin-top: 0.5rem; font-size: 0.8rem; color: #666;"></div>
+        <div id="handleStatus" style="margin-top: 0.375rem; font-size: 0.8rem;"></div>
+      </div>
+      <button class="btn" id="saveBtn" disabled>Save & continue</button>
+      <div class="status-msg" id="statusMsg"></div>
     </div>
 
     <div class="welcome-steps">
@@ -28,22 +39,103 @@
       </div>
       <div class="feature">
         <h3>2. Share your link</h3>
-        <p>Your public profile is at <strong id="profileLink"></strong>. Agents use this to discover your pricing.</p>
+        <p>Your public profile will be at <strong id="profileLink"></strong>. Agents use this to discover your pricing.</p>
       </div>
       <div class="feature">
         <h3>3. Get paid to read</h3>
         <p>When someone pays your toll, their message is delivered to your inbox via email. You earn money for your attention.</p>
       </div>
     </div>
-
-    <a href="/settings" class="btn">Configure your settings</a>
   </div>
 
   <script>
-    const data = "/*__RECIPIENT_DATA__*/";
+    var data = "/*__RECIPIENT_DATA__*/";
+    var handleAvailable = true;
+    var debounceTimer;
+
     if (data && data.handle) {
-      document.getElementById('profileLink').textContent = window.location.origin + '/' + data.handle;
+      document.getElementById('handleInput').value = data.handle;
+      updatePreview(data.handle);
+      document.getElementById('saveBtn').disabled = false;
     }
+
+    document.getElementById('handleInput').addEventListener('input', function() {
+      var val = this.value.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+      this.value = val;
+      updatePreview(val);
+
+      clearTimeout(debounceTimer);
+      var statusEl = document.getElementById('handleStatus');
+      var saveBtn = document.getElementById('saveBtn');
+      saveBtn.disabled = true;
+
+      if (!val || val.length < 3) {
+        statusEl.textContent = val ? 'Handle must be at least 3 characters' : '';
+        statusEl.style.color = '#991b1b';
+        return;
+      }
+
+      statusEl.textContent = 'Checking...';
+      statusEl.style.color = '#666';
+
+      debounceTimer = setTimeout(function() {
+        fetch('/settings/check-handle/' + encodeURIComponent(val))
+          .then(function(r) { return r.json(); })
+          .then(function(result) {
+            if (result.available) {
+              statusEl.textContent = 'Available';
+              statusEl.style.color = '#065f46';
+              handleAvailable = true;
+              saveBtn.disabled = false;
+            } else {
+              statusEl.textContent = result.error || 'Already taken';
+              statusEl.style.color = '#991b1b';
+              handleAvailable = false;
+              saveBtn.disabled = true;
+            }
+          });
+      }, 300);
+    });
+
+    function updatePreview(handle) {
+      var preview = document.getElementById('handlePreview');
+      var profileLink = document.getElementById('profileLink');
+      var url = window.location.origin + '/' + (handle || '...');
+      preview.textContent = url;
+      profileLink.textContent = url;
+    }
+
+    document.getElementById('saveBtn').addEventListener('click', async function() {
+      var handle = document.getElementById('handleInput').value.trim().toLowerCase();
+      var statusMsg = document.getElementById('statusMsg');
+      var saveBtn = this;
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving...';
+
+      try {
+        var res = await fetch('/settings', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ handle: handle }),
+        });
+
+        if (res.ok) {
+          window.location.href = '/settings';
+        } else {
+          var err = await res.json();
+          statusMsg.className = 'status-msg error';
+          statusMsg.textContent = err.message || err.error;
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save & continue';
+        }
+      } catch (e) {
+        statusMsg.className = 'status-msg error';
+        statusMsg.textContent = 'Network error. Please try again.';
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save & continue';
+      }
+    });
   </script>
 </body>
 </html>

@@ -5,6 +5,46 @@ import { requireAuth, AuthenticatedRequest } from '../middleware/auth';
 
 export const settingsRouter = Router();
 
+const RESERVED_HANDLES = [
+  'auth', 'registry', 'schedule', 'settings', 'welcome', 'pay',
+  'health', 'admin', 'api', 'login', 'signup', 'logout', 'about',
+  'help', 'support', 'billing', 'pricing', 'public', 'static',
+];
+
+export function validateHandle(handle: string): { valid: boolean; error?: string } {
+  if (!handle) return { valid: false, error: 'Handle is required' };
+  if (handle.length < 3) return { valid: false, error: 'Handle must be at least 3 characters' };
+  if (handle.length > 30) return { valid: false, error: 'Handle must be 30 characters or fewer' };
+  if (!/^[a-z0-9][a-z0-9_-]*[a-z0-9]$/.test(handle) && handle.length > 2) {
+    return { valid: false, error: 'Handle must be lowercase alphanumeric (hyphens and underscores allowed in the middle)' };
+  }
+  if (!/^[a-z0-9]+$/.test(handle) && handle.length <= 2) {
+    return { valid: false, error: 'Handle must be lowercase alphanumeric' };
+  }
+  if (RESERVED_HANDLES.includes(handle)) {
+    return { valid: false, error: 'This handle is reserved' };
+  }
+  return { valid: true };
+}
+
+// Check handle availability (unauthenticated — used by welcome page)
+settingsRouter.get('/check-handle/:handle', async (req, res) => {
+  const handle = req.params.handle.toLowerCase();
+  const validation = validateHandle(handle);
+  if (!validation.valid) {
+    res.json({ available: false, error: validation.error });
+    return;
+  }
+
+  const { data: existing } = await supabase
+    .from('recipients')
+    .select('id')
+    .eq('handle', handle)
+    .single();
+
+  res.json({ available: !existing });
+});
+
 // Serve settings page
 settingsRouter.get('/', requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
@@ -89,7 +129,7 @@ settingsRouter.get('/json', requireAuth, async (req: AuthenticatedRequest, res, 
 // Update settings
 settingsRouter.patch('/', requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
-    const allowedFields = ['price_usd', 'accepted_rails', 'whitelist', 'wallet_address', 'category_preferences', 'bio', 'x_url', 'linkedin_url'];
+    const allowedFields = ['handle', 'price_usd', 'accepted_rails', 'whitelist', 'wallet_address', 'category_preferences', 'bio', 'x_url', 'linkedin_url'];
     const updates: Record<string, unknown> = {};
 
     for (const field of allowedFields) {
@@ -103,6 +143,28 @@ settingsRouter.patch('/', requireAuth, async (req: AuthenticatedRequest, res, ne
       return;
     }
 
+    // Validate handle if being updated
+    if (updates.handle !== undefined) {
+      const handle = (updates.handle as string).toLowerCase();
+      const validation = validateHandle(handle);
+      if (!validation.valid) {
+        res.status(400).json({ error: 'invalid_handle', message: validation.error });
+        return;
+      }
+      // Check uniqueness excluding current user
+      const { data: conflict } = await supabase
+        .from('recipients')
+        .select('id')
+        .eq('handle', handle)
+        .neq('id', req.recipientId!)
+        .single();
+      if (conflict) {
+        res.status(409).json({ error: 'handle_taken', message: 'This handle is already taken' });
+        return;
+      }
+      updates.handle = handle;
+    }
+
     const { data, error } = await supabase
       .from('recipients')
       .update(updates)
@@ -111,6 +173,10 @@ settingsRouter.patch('/', requireAuth, async (req: AuthenticatedRequest, res, ne
       .single();
 
     if (error) {
+      if (error.code === '23505') {
+        res.status(409).json({ error: 'handle_taken', message: 'This handle is already taken' });
+        return;
+      }
       res.status(500).json({ error: 'update_failed', detail: error.message });
       return;
     }

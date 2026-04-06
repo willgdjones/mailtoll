@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { google } from 'googleapis';
 import { config } from '../config';
 import { supabase } from '../db';
+import { validateHandle } from './settings';
 
 export const authRouter = Router();
 
@@ -50,7 +51,11 @@ authRouter.get('/google/callback', async (req, res, next) => {
     }
 
     // Generate handle from email (before @)
-    const baseHandle = userInfo.email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+    let baseHandle = userInfo.email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+    // Avoid reserved words
+    if (!validateHandle(baseHandle).valid) {
+      baseHandle = baseHandle + '1';
+    }
 
     // Upsert recipient
     const { data: existing } = await supabase
