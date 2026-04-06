@@ -2,6 +2,10 @@
 
 ## 2026-04-06
 
+### Add PostHog analytics
+- Added PostHog snippet to landing page and settings page
+- Tracks pageviews and identified users
+
 ### Remove Gmail API permissions
 - OAuth now only requests `openid`, `email`, `profile` — no more `gmail.modify` or `gmail.labels`
 - Landing page updated: "Connect your Gmail" → "Sign in with Google"
