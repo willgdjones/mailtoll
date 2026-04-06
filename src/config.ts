@@ -36,6 +36,10 @@ export const config = {
   cdpApiKeyId: optional('CDP_API_KEY_ID', ''),
   cdpApiKeySecret: optional('CDP_API_KEY_SECRET', ''),
 
+  // Email
+  resendApiKey: required('RESEND_API_KEY'),
+  resendFromEmail: optional('RESEND_FROM_EMAIL', 'Mail Toll <noreply@mailtoll.app>'),
+
   // App
   platformCutPercent: parseInt(optional('PLATFORM_CUT_PERCENT', '20'), 10),
   jwtSecret: required('JWT_SECRET'),

@@ -1,8 +1,7 @@
 import { pool } from '../../db';
+import { config } from '../../config';
 import { Recipient, ScheduledEmail } from '../../types';
-import { createGmailClient } from '../gmail/client';
-import { buildRawEmail } from '../gmail/email';
-import { injectEmail } from '../gmail/inject';
+import { sendEmail } from '../email/resend';
 
 const BATCH_SIZE = 50;
 const MAX_RETRIES = 5;
@@ -71,16 +70,13 @@ async function processEmail(email: ScheduledEmail): Promise<void> {
       const recipient = rows[0];
       if (!recipient) throw new Error(`Recipient ${email.recipient_id} not found`);
 
-      // Create Gmail client and inject
-      const gmail = createGmailClient(recipient);
-      const rawEmail = buildRawEmail({
-        from: email.sender_email,
+      // Send via Resend
+      const gmailMessageId = await sendEmail({
+        from: `${email.sender_email} via Mail Toll <noreply@mailtoll.app>`,
         to: recipient.email,
         subject: email.subject,
         body: email.body,
       });
-
-      const gmailMessageId = await injectEmail(gmail, recipient, rawEmail);
 
       // Mark as delivered
       await client.query(
