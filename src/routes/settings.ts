@@ -23,16 +23,18 @@ settingsRouter.get('/', requireAuth, async (req: AuthenticatedRequest, res, next
     const fs = await import('fs');
     const htmlPath = path.join(__dirname, '..', 'views', 'settings.html');
     let html = fs.readFileSync(htmlPath, 'utf-8');
+    const recipientJson = JSON.stringify({
+      handle: recipient.handle,
+      email: recipient.email,
+      price_usd: parseFloat(recipient.price_usd),
+      accepted_rails: recipient.accepted_rails,
+      whitelist: recipient.whitelist || [],
+      wallet_address: recipient.wallet_address || '',
+      category_preferences: recipient.category_preferences || '',
+    });
     html = html.replace(
-      '/*__RECIPIENT_DATA__*/',
-      JSON.stringify({
-        handle: recipient.handle,
-        email: recipient.email,
-        price_usd: parseFloat(recipient.price_usd),
-        accepted_rails: recipient.accepted_rails,
-        whitelist: recipient.whitelist || [],
-        category_preferences: recipient.category_preferences || '',
-      })
+      '"/*__RECIPIENT_DATA__*/"',
+      recipientJson
     );
     res.send(html);
   } catch (err) {
@@ -45,7 +47,7 @@ settingsRouter.get('/json', requireAuth, async (req: AuthenticatedRequest, res, 
   try {
     const { data: recipient } = await supabase
       .from('recipients')
-      .select('handle, email, price_usd, accepted_rails, whitelist, category_preferences')
+      .select('handle, email, price_usd, accepted_rails, whitelist, wallet_address, category_preferences')
       .eq('id', req.recipientId)
       .single();
 
@@ -66,7 +68,7 @@ settingsRouter.get('/json', requireAuth, async (req: AuthenticatedRequest, res, 
 // Update settings
 settingsRouter.patch('/', requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
-    const allowedFields = ['price_usd', 'accepted_rails', 'whitelist', 'category_preferences'];
+    const allowedFields = ['price_usd', 'accepted_rails', 'whitelist', 'wallet_address', 'category_preferences'];
     const updates: Record<string, unknown> = {};
 
     for (const field of allowedFields) {
@@ -84,7 +86,7 @@ settingsRouter.patch('/', requireAuth, async (req: AuthenticatedRequest, res, ne
       .from('recipients')
       .update(updates)
       .eq('id', req.recipientId)
-      .select('handle, email, price_usd, accepted_rails, whitelist, category_preferences')
+      .select('handle, email, price_usd, accepted_rails, whitelist, wallet_address, category_preferences')
       .single();
 
     if (error) {

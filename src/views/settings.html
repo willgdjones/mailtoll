@@ -30,6 +30,11 @@
       </div>
 
       <div class="form-group">
+        <label for="wallet">Wallet address (Base network, for receiving USDC)</label>
+        <input type="text" id="wallet" name="wallet_address" placeholder="0x...">
+      </div>
+
+      <div class="form-group">
         <label for="whitelist">Whitelisted emails (comma-separated)</label>
         <input type="text" id="whitelist" name="whitelist" placeholder="partner@company.com, friend@example.com">
       </div>
@@ -46,12 +51,13 @@
   </div>
 
   <script>
-    const data = /*__RECIPIENT_DATA__*/null;
+    const data = "/*__RECIPIENT_DATA__*/";
 
     if (data) {
       document.getElementById('handleDisplay').textContent =
         'Your endpoint: ' + window.location.origin + '/registry/' + data.handle;
       document.getElementById('price').value = data.price_usd;
+      document.getElementById('wallet').value = data.wallet_address || '';
       document.getElementById('whitelist').value = (data.whitelist || []).join(', ');
       document.getElementById('preferences').value = data.category_preferences || '';
 
@@ -74,6 +80,7 @@
       const body = {
         price_usd: parseFloat(document.getElementById('price').value),
         accepted_rails,
+        wallet_address: document.getElementById('wallet').value.trim() || null,
         whitelist,
         category_preferences: document.getElementById('preferences').value.trim(),
       };
@@ -82,6 +89,7 @@
         const res = await fetch('/settings', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
           body: JSON.stringify(body),
         });
 

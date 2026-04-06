@@ -38,8 +38,10 @@ app.use('/settings', settingsRouter);
 
 app.use(errorHandler);
 
-app.listen(config.port, () => {
-  console.log(`Mail Toll API running on port ${config.port}`);
-});
+if (require.main === module) {
+  app.listen(config.port, () => {
+    console.log(`Mail Toll API running on port ${config.port}`);
+  });
+}
 
 export default app;

@@ -30,7 +30,11 @@ export const config = {
   stripeSecretKey: optional('STRIPE_SECRET_KEY', ''),
   coinbaseCommerceApiKey: optional('COINBASE_COMMERCE_API_KEY', ''),
   rpcNodeUrl: optional('RPC_NODE_URL', ''),
-  x402FacilitatorUrl: optional('X402_FACILITATOR_URL', 'https://x402-facilitator.coinbase.com'),
+  x402FacilitatorUrl: optional('X402_FACILITATOR_URL', 'https://x402.org/facilitator'),
+  x402Network: optional('X402_NETWORK', 'base-sepolia') as 'base-sepolia' | 'base',
+  walletAddress: optional('WALLET_ADDRESS', ''),
+  cdpApiKeyId: optional('CDP_API_KEY_ID', ''),
+  cdpApiKeySecret: optional('CDP_API_KEY_SECRET', ''),
 
   // App
   platformCutPercent: parseInt(optional('PLATFORM_CUT_PERCENT', '20'), 10),

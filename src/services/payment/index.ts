@@ -4,7 +4,7 @@ import { VerifyPaymentArgs } from '../../types';
 import { verifyStripePayment } from './stripe';
 import { verifyCoinbasePayment } from './coinbase';
 import { verifyStablecoinPayment } from './stablecoin';
-import { verifyX402Payment } from './x402';
+
 
 export async function verifyPayment(args: VerifyPaymentArgs): Promise<boolean> {
   const { rail, proof, expected_amount_usd, recipient_id } = args;
@@ -34,8 +34,8 @@ export async function verifyPayment(args: VerifyPaymentArgs): Promise<boolean> {
       valid = await verifyStablecoinPayment(proof, expected_amount_usd);
       break;
     case 'x402':
-      valid = await verifyX402Payment(proof, expected_amount_usd);
-      break;
+      // x402 is handled via X-PAYMENT header in the schedule route
+      return false;
     default:
       return false;
   }

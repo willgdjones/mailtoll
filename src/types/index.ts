@@ -9,6 +9,7 @@ export interface Recipient {
   price_usd: number;
   accepted_rails: string[];
   whitelist: string[] | null;
+  wallet_address: string | null;
   category_preferences: string | null;
   created_at: string;
 }
