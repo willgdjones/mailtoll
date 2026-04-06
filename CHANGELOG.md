@@ -2,6 +2,11 @@
 
 ## 2026-04-06
 
+### Profile pages: bio and social links
+- Added bio, X (Twitter) URL, and LinkedIn URL fields to recipient profiles
+- New fields editable from settings page
+- Public profile pages display bio and linked social accounts
+
 ### Pre-launch improvements
 - Error/404 pages — proper HTML pages instead of raw JSON for browser requests
 - Fixed signup flow — removed Gmail token storage since we use Resend now

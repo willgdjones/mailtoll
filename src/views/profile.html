@@ -24,6 +24,15 @@
       <p id="priceDisplay"></p>
     </div>
 
+    <div id="bioSection" style="display:none; margin-bottom: 1.5rem;">
+      <p id="bioDisplay" style="font-size: 1rem; color: #444; text-align: center;"></p>
+    </div>
+
+    <div id="socialLinks" style="display:none; text-align: center; margin-bottom: 1.5rem;">
+      <a id="xLink" href="#" target="_blank" rel="noopener" style="display:none; margin-right: 1rem;">X (Twitter)</a>
+      <a id="linkedinLink" href="#" target="_blank" rel="noopener" style="display:none;">LinkedIn</a>
+    </div>
+
     <div class="features">
       <div class="feature">
         <h3>Accepted payment rails</h3>
@@ -55,6 +64,28 @@
       if (data.category_preferences) {
         document.getElementById('preferencesSection').style.display = '';
         document.getElementById('preferencesDisplay').textContent = data.category_preferences;
+      }
+
+      if (data.bio) {
+        document.getElementById('bioSection').style.display = '';
+        document.getElementById('bioDisplay').textContent = data.bio;
+      }
+
+      var hasLinks = false;
+      if (data.x_url) {
+        var xEl = document.getElementById('xLink');
+        xEl.href = data.x_url;
+        xEl.style.display = '';
+        hasLinks = true;
+      }
+      if (data.linkedin_url) {
+        var liEl = document.getElementById('linkedinLink');
+        liEl.href = data.linkedin_url;
+        liEl.style.display = '';
+        hasLinks = true;
+      }
+      if (hasLinks) {
+        document.getElementById('socialLinks').style.display = '';
       }
     }
   </script>

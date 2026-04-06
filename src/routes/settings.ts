@@ -45,6 +45,9 @@ settingsRouter.get('/', requireAuth, async (req: AuthenticatedRequest, res, next
       whitelist: recipient.whitelist || [],
       wallet_address: recipient.wallet_address || '',
       category_preferences: recipient.category_preferences || '',
+      bio: recipient.bio || '',
+      x_url: recipient.x_url || '',
+      linkedin_url: recipient.linkedin_url || '',
       stats: {
         total_emails: totalEmails || 0,
         total_earnings_usd: totalEarnings,
@@ -65,7 +68,7 @@ settingsRouter.get('/json', requireAuth, async (req: AuthenticatedRequest, res, 
   try {
     const { data: recipient } = await supabase
       .from('recipients')
-      .select('handle, email, price_usd, accepted_rails, whitelist, wallet_address, category_preferences')
+      .select('handle, email, price_usd, accepted_rails, whitelist, wallet_address, category_preferences, bio, x_url, linkedin_url')
       .eq('id', req.recipientId)
       .single();
 
@@ -86,7 +89,7 @@ settingsRouter.get('/json', requireAuth, async (req: AuthenticatedRequest, res, 
 // Update settings
 settingsRouter.patch('/', requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
-    const allowedFields = ['price_usd', 'accepted_rails', 'whitelist', 'wallet_address', 'category_preferences'];
+    const allowedFields = ['price_usd', 'accepted_rails', 'whitelist', 'wallet_address', 'category_preferences', 'bio', 'x_url', 'linkedin_url'];
     const updates: Record<string, unknown> = {};
 
     for (const field of allowedFields) {
@@ -104,7 +107,7 @@ settingsRouter.patch('/', requireAuth, async (req: AuthenticatedRequest, res, ne
       .from('recipients')
       .update(updates)
       .eq('id', req.recipientId)
-      .select('handle, email, price_usd, accepted_rails, whitelist, wallet_address, category_preferences')
+      .select('handle, email, price_usd, accepted_rails, whitelist, wallet_address, category_preferences, bio, x_url, linkedin_url')
       .single();
 
     if (error) {

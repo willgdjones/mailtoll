@@ -81,7 +81,7 @@ app.get('/:handle', async (req, res, next) => {
     const { handle } = req.params;
     const { data: recipient } = await supabase
       .from('recipients')
-      .select('handle, price_usd, accepted_rails, category_preferences')
+      .select('handle, price_usd, accepted_rails, category_preferences, bio, x_url, linkedin_url')
       .eq('handle', handle)
       .single();
 
@@ -100,6 +100,9 @@ app.get('/:handle', async (req, res, next) => {
       price_usd: parseFloat(recipient.price_usd),
       accepted_rails: recipient.accepted_rails,
       category_preferences: recipient.category_preferences,
+      bio: recipient.bio || '',
+      x_url: recipient.x_url || '',
+      linkedin_url: recipient.linkedin_url || '',
     }));
     res.send(html);
   } catch (err) {
