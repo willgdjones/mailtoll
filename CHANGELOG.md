@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-04-05
+
+### Editorial restyle (impeccable design pass)
+- Rewrote `public/styles.css` with a refined editorial aesthetic: Fraunces serif display, Inter body, warm paper background with soft radial washes, ink/gold palette via OKLCH
+- Wordmark header injected on every page via `.container::before`
+- Numbered editorial feature list (replaces uniform card grid)
+- Stats grid restyled as large serif figures with vertical rule
+- Payment-rail checkboxes restyled as toggle pills with `:has()` selector
+- Form inputs get gold focus ring; buttons gain subtle lift on hover
+- Respects `prefers-reduced-motion`; mobile breakpoint at 540px
+
 ## 2026-04-06
 
 ### Fix OAuth redirect + custom handle selection
