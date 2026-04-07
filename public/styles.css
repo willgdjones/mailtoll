@@ -208,7 +208,10 @@ a:hover { text-decoration-color: var(--gold-deep); }
   font-size: 1.5rem;
   color: var(--gold-deep);
   font-variant-numeric: tabular-nums;
+  grid-column: 1;
+  grid-row: 1 / span 2;
 }
+.feature > * { grid-column: 2; }
 .features { counter-reset: feat; }
 .feature { counter-increment: feat; }
 .feature h3 {
